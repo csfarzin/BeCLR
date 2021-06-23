@@ -27,7 +27,7 @@ class CIFAR10Pair(CIFAR10):
         if self.target_transform is not None:
             target = self.target_transform(target)
 
-        return pos_1, pos_2, target
+        return [pos_1, pos_2], target
 
 
 class CIFAR100Pair(CIFAR100):
@@ -43,7 +43,7 @@ class CIFAR100Pair(CIFAR100):
         if self.target_transform is not None:
             target = self.target_transform(target)
 
-        return pos_1, pos_2, target
+        return [pos_1, pos_2], target
     
     
 class STL10Pair(STL10):
@@ -61,7 +61,7 @@ class STL10Pair(STL10):
         if self.target_transform is not None:
             target = self.target_transform(target)
 
-        return pos_1, pos_2, target
+        return [pos_1, pos_2], target
     
     
 class SKINPair(SKIN):
@@ -74,4 +74,4 @@ class SKINPair(SKIN):
             pos_1 = self.transform(img)
             pos_2 = self.transform(img)
 
-        return pos_1, pos_2, target
+        return [pos_1, pos_2], target

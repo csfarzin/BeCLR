@@ -5,15 +5,25 @@ import random
 #from data_aug.gaussian_blur import GaussianBlur
 
 def transform(size, mean, std):
-    train_transform = transforms.Compose([
-        transforms.RandomResizedCrop(size),
-        transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8), #(0.8, 0.8, 0.8, 0.2)
-        transforms.RandomGrayscale(p=0.2),
-        transforms.RandomApply([GaussianBlur([.1, 2.])], p=0.5),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=mean, std=std)
-    ])
+    if size > 100:
+        train_transform = transforms.Compose([
+            transforms.RandomResizedCrop(size),
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8), #(0.8, 0.8, 0.8, 0.2)
+            transforms.RandomGrayscale(p=0.2),
+            transforms.RandomApply([GaussianBlur([.1, 2.])], p=0.5),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=mean, std=std)
+        ])
+    else:
+        train_transform = transforms.Compose([
+            transforms.RandomResizedCrop(size),
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8), #(0.8, 0.8, 0.8, 0.2)
+            transforms.RandomGrayscale(p=0.2),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=mean, std=std)
+        ])
 
     test_transform = transforms.Compose([
         transforms.Resize((size, size)),

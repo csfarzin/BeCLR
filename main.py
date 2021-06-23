@@ -17,7 +17,7 @@ from data_aug.data_loader import CustomDataLoader
 from model import Model
 from trainer import Trainer
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3,4"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
 def save_config_file(model_checkpoints_folder, args):
@@ -33,20 +33,20 @@ if __name__ == '__main__':
     parser.add_argument('--temperature', default=0.5, type=float, help='Temperature used in softmax')
     parser.add_argument('--k_nn', default=200, type=int, help='k in knn')
     parser.add_argument('--batch_size', default=512, type=int, help='batch size')
-    parser.add_argument('--epochs', default=1000, type=int, help='epochs')
-    parser.add_argument('--k_subs', default=200, type=int, help='k subnets')
-    parser.add_argument('--layer_size', default=[100, 1], type=int,
+    parser.add_argument('--epochs', default=500, type=int, help='epochs')
+    parser.add_argument('--k_subs', default=100, type=int, help='k subnets')
+    parser.add_argument('--layer_size', default=[128, 1], type=int,
                         help='subnetworks layers size (defaut: [64, 1])')
     parser.add_argument('--lr', default=5e-3, type=float,help='initial learning rate')
     parser.add_argument('--wd', default=1e-6, type=float, help='weight decay (default: 1e-4)')
     parser.add_argument('--seed', default=10, type=int, help='seed for initializing training.')
-    parser.add_argument('--workers', default=16, type=int, help='number of data loading workers')
+    parser.add_argument('--workers', default=8, type=int, help='number of data loading workers')
     parser.add_argument('--base_model',
                         default='resnet50',
                         help='dataset name',
                         choices=["resnet18", "resnet50"])
     
-    parser.add_argument('-dataset-name', default='cifar10',
+    parser.add_argument('-dataset-name', default='cifar100',
                     help='dataset name', choices=['stl10',
                                                   'cifar10',
                                                   'cifar100',
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     print(model)
     if torch.cuda.device_count() > 1:
             print("We have available", torch.cuda.device_count(), "GPUs!")
-            model = nn.DataParallel(model, device_ids=[0, 1, 2, 3, 4])
+            model = nn.DataParallel(model, device_ids=[0,1])
     
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(

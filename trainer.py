@@ -48,7 +48,6 @@ class Trainer():
         num_max = torch.tensor([0])
         for [aug_1, aug_2], target in train_bar:
             aug_1, aug_2 = aug_1.to(self.device), aug_2.to(self.device)
-
             feature_1, out_1 = self.model(aug_1)
             feature_2, out_2 = self.model(aug_2)
 
@@ -125,7 +124,6 @@ class Trainer():
             # loop test data to predict the label by weighted knn search
             test_bar = tqdm(test_data_loader)
             for [data, _], target in test_bar:
-                print(data.shape)
                 data, target = data.to(self.device), target.to(self.device)
                 feature, out = self.model(data)
 
