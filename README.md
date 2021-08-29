@@ -1,10 +1,19 @@
 ## BeCLR: Bregman Divergence Improves Contrastive Learning of Visual Representations
+<p align="center">
+  <img src="https://github.com/csfarzin/BeCLR/blob/master/media/BeCLR_Arch.jpg" width="500"/>
+</p>
+
 This is the official PyTorch implementation of the BeCLR paper:
 ```
 @Article{
 
+
 }
 ```
+
+
+
+
 
 ## Requirements
 - [Anaconda](https://www.anaconda.com/download/)
