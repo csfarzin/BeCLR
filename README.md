@@ -3,9 +3,8 @@
   <img src="https://github.com/csfarzin/BeCLR/blob/master/media/BeCLR_Arch.jpg" width="800"/>
 </p>
 
-```
 Abstract: Deep divergence learning aims to measure the divergence of data points using neural networks and tune the deep neural networks for the relevant tasks. In this paper, we propose deep Bregman divergences for contrastive learning of visual representation. We aim to enhance contrastive loss used in self-supervised by learning functional Bregman divergences. In contrast to the conventional contrastive learning methods which are solely based on divergences between single points, our framework can capture the divergence between distributions which improves the quality of learned representation. Our setup exhibits desirable properties such as invariance to viewpoints, deformation, and intra-class variations. Our experiments show that learned representations beside learning divergences, one can considerably improve the baseline on several tasks such as classification and object detection. 
-```
+
 
 This is the official PyTorch implementation of the BeCLR paper:
 ```
