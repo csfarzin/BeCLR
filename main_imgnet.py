@@ -47,15 +47,7 @@ if __name__ == '__main__':
                         choices=["resnet18", "resnet50"])
     
     parser.add_argument('-dataset-name', default='imagenet',
-                    help='dataset name', choices=['stl10',
-                                                  'cifar10',
-                                                  'cifar100',
-                                                  'brain',
-                                                  'skin',
-                                                  'retina',
-                                                  'iris',
-                                                  'imagenet'
-                                                  'coco'])
+                    help='dataset name')
     # args parse
     args = parser.parse_args()
     base_model = args.base_model
