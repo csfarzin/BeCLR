@@ -58,3 +58,9 @@ optional arguments:
 --batch_size                  Number of images in each mini-batch [default value is 512]
 --epochs                      Number of sweeps over the dataset to train [default value is 100]
 ```
+
+## Logging and TensorBoard
+To view results in TensorBoard, run:
+```
+tensorboard --logdir runs
+```
