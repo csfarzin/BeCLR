@@ -17,7 +17,7 @@ from data_aug.data_loader import CustomDataLoader
 from model import Model
 from trainer import Trainer
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
 
 
 def save_config_file(model_checkpoints_folder, args):
@@ -31,11 +31,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train SimCLR')
     parser.add_argument('--fc_dim', default=128, type=int, help='Feature dim for latent vector')
     parser.add_argument('--temperature', default=0.5, type=float, help='Temperature used in softmax')
-    parser.add_argument('--k_nn', default=200, type=int, help='k in knn')
-    parser.add_argument('--batch_size', default=512, type=int, help='batch size')
+    parser.add_argument('--k_nn', default=50, type=int, help='k in knn')
+    parser.add_argument('--batch_size', default=64, type=int, help='batch size')
     parser.add_argument('--epochs', default=500, type=int, help='epochs')
     parser.add_argument('--k_subs', default=100, type=int, help='k subnets')
-    parser.add_argument('--layer_size', default=[128, 1], type=int,
+    parser.add_argument('--layer_size', default=[512, 1], type=int,
                         help='subnetworks layers size (defaut: [64, 1])')
     parser.add_argument('--lr', default=5e-3, type=float,help='initial learning rate')
     parser.add_argument('--wd', default=1e-6, type=float, help='weight decay (default: 1e-4)')
@@ -46,16 +46,14 @@ if __name__ == '__main__':
                         help='dataset name',
                         choices=["resnet18", "resnet50"])
     
-    parser.add_argument('-dataset-name', default='cifar100',
+    parser.add_argument('-dataset-name', default='skin',
                     help='dataset name', choices=['stl10',
                                                   'cifar10',
                                                   'cifar100',
                                                   'brain',
                                                   'skin',
                                                   'retina',
-                                                  'iris',
-                                                  'imagenet'
-                                                  'coco'])
+                                                  'iris'])
     # args parse
     args = parser.parse_args()
     base_model = args.base_model
@@ -92,7 +90,7 @@ if __name__ == '__main__':
     print(model)
     if torch.cuda.device_count() > 1:
             print("We have available", torch.cuda.device_count(), "GPUs!")
-            model = nn.DataParallel(model, device_ids=[0,1])
+            model = nn.DataParallel(model, device_ids=[0,1,2,3])
     
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
@@ -114,9 +112,10 @@ if __name__ == '__main__':
                'bloss_loss': [],
                'NTXent_loss': [],
                'test_acc@1': [],
-               'test_acc@5': []
+               'test_acc@5': [],
+               'LR': []
               }
-    save_name_pre = '{}_K{}_{}_{}_{}_{}_{}_{}_{}'.format(
+    save_name_pre = '{}_K{}_{}_lr{}_{}_{}_{}_{}_{}'.format(
         dataset_name, args.k_subs,
         base_model, lr,
         fc_dim, temperature,
@@ -127,11 +126,13 @@ if __name__ == '__main__':
     
     best_acc = 0.0
     for epoch in range(1, epochs + 1):
-        train_loss, bloss, NTXent = trainer.train(train_loader, epoch)
+        train_loss, bloss, NTXent, last_lr = trainer.train(train_loader, epoch)
         results['train_loss'].append(train_loss)
         results['bloss_loss'].append(bloss)
         results['NTXent_loss'].append(NTXent)
+        results['LR'].append(last_lr)
         writer.add_scalar('loss/train', results['train_loss'][-1], epoch)
+        writer.add_scalar('LR', results['LR'][-1], epoch)
         
         test_acc_1, test_acc_5 = trainer.test(memory_loader, test_loader, k_nn, epoch)
         results['test_acc@1'].append(test_acc_1)
@@ -153,13 +154,15 @@ if __name__ == '__main__':
     
     # plotting loss and accuracies
     df = pd.read_csv(csv_dir)
-    fig, axes = plt.subplots(1, 3, sharex=True, figsize=(20,5))
-    axes[0].set_title('Loss/Train')
-    axes[1].set_title('acc@1/test')
-    axes[2].set_title('acc@5/test')
-    sns.lineplot(ax=axes[0], x="epoch", y="train_loss", data=df)
-    sns.lineplot(ax=axes[1], x="epoch", y="test_acc@1", data=df)
-    sns.lineplot(ax=axes[2], x="epoch", y="test_acc@5", data=df)
+    fig, axes = plt.subplots(2, 2, sharex=True, figsize=(20,10))
+    axes[0, 0].set_title('Loss/Train')
+    axes[1, 0].set_title('Learning Rate')
+    axes[0, 1].set_title('acc@1/test')
+    axes[1, 1].set_title('acc@5/test')
+    sns.lineplot(ax=axes[0, 0], x="epoch", y="train_loss", data=df)
+    sns.lineplot(ax=axes[1, 0], x="epoch", y="LR", data=df)
+    sns.lineplot(ax=axes[0, 1], x="epoch", y="test_acc@1", data=df)
+    sns.lineplot(ax=axes[1, 1], x="epoch", y="test_acc@5", data=df)
     
     fig.savefig(fig_dir)
     

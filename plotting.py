@@ -14,7 +14,7 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model_path = 'runs/May24_15-11-04_gpuserver.stat.uni-muenchen.de/cifar10_K100_resnet18_0.001_128_0.1_200_512_300_model.pth'
+model_path = ''
 model = Model(base_model="resnet18",
                  fc_dim=128,
                  k_subs=100,

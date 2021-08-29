@@ -20,7 +20,7 @@ class Model(nn.Module):
                        "resnet50": resnet50(num_classes=fc_dim)}
         model = resnet_dict[base_model]
         dim_mlp = model.fc.in_features
-   
+        
         self.f = []
         
         if skin:

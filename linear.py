@@ -7,15 +7,14 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from torchvision.datasets import CIFAR10, CIFAR100, STL10
-from data_aug.skin import SKIN
+from torchvision.datasets import ImageFolder
 from tqdm import tqdm
 sns.set_theme(style="darkgrid")
 
-from data_aug.transformation import transform
+#from data_aug.transformation import transform
 from model import Model
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
 
 
 class bcolors:
@@ -30,14 +29,14 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 class Net(nn.Module):
-    def __init__(self, num_class, pretrained_path):
+    def __init__(self, base_model, num_class, pretrained_path):
         super(Net, self).__init__()
 
         # encoder
-        model = Model()
+        model = Model(base_model=base_model)
         self.f = model.f
         # classifier
-        self.fc = nn.Linear(512, num_class, bias=True)
+        self.fc = nn.Linear(2048, num_class, bias=True)
         self.load_state_dict(torch.load(pretrained_path, map_location='cpu'), strict=False)
 
     def forward(self, x):
@@ -98,32 +97,23 @@ if __name__ == '__main__':
     parser.add_argument(
         '--model_path',
         type=str,
-        default='runs/May27_01-08-23_gpuserver.stat.uni-muenchen.de/cifar10_K100_resnet18_0.001_128_0.1_200_512_600_model.pth',
+        default='',
         help='The pretrained model path')
     
     parser.add_argument(
         '--log_dir',
         type=str,
-        default='runs/May27_01-08-23_gpuserver.stat.uni-muenchen.de',
+        default='',
         help='Dir to save csv')
     parser.add_argument(
-        '--batch_size', type=int, default=256, help='Number of images in each mini-batch')
+        '--batch_size', type=int, default=512, help='Number of images in each mini-batch')
     parser.add_argument(
         '--epochs', type=int, default=100, help='Number of sweeps over the dataset to train')
     parser.add_argument('--base_model',
-                        default='resnet18',
+                        default='resnet50',
                         help='dataset name',
                         choices=["resnet18", "resnet50"])
-    parser.add_argument('-dataset-name', default='cifar10',
-                help='dataset name', choices=['stl10',
-                                              'cifar10',
-                                              'cifar100',
-                                              'brain',
-                                              'skin',
-                                              'retina',
-                                              'iris',
-                                              'imagenet'
-                                              'coco'])
+    parser.add_argument('-dataset-name', default='imagenet', help='dataset name')
 
     args = parser.parse_args()
     model_path, batch_size, epochs = args.model_path, args.batch_size, args.epochs
@@ -132,74 +122,46 @@ if __name__ == '__main__':
     log_dir = args.log_dir
     k_subnets = 100
     
-    if dataset_name == 'cifar10':
-        mean = [0.4914, 0.4822, 0.4465]
-        std = [0.2023, 0.1994, 0.2010]
-        train_transform, test_transform = transform(32, mean, std)
-        
-        train_data = CIFAR10(
-            root='data', train=True, transform=test_transform, download=True)
-        train_loader = DataLoader(
-            train_data, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=True)
-        test_data = CIFAR10(
-            root='data', train=False, transform=test_transform, download=True)
-        test_loader = DataLoader(
-            test_data, batch_size=batch_size, shuffle=False, num_workers=8, pin_memory=True)
-    
-    if dataset_name == 'cifar100':
-        mean = [0.4914, 0.4822, 0.4465]
-        std = [0.2023, 0.1994, 0.2010]
-        train_transform, test_transform = transform(32, mean, std)
-        
-        train_data = CIFAR100(
-            root='data', train=True, transform=test_transform, download=True)
-        train_loader = DataLoader(
-            train_data, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=True)
-        test_data = CIFAR100(
-            root='data', train=False, transform=test_transform, download=True)
-        test_loader = DataLoader(
-            test_data, batch_size=batch_size, shuffle=False, num_workers=8, pin_memory=True)
-        
-    if dataset_name == 'stl10':
+    if dataset_name == 'imagenet':
         # get test and train transformation
-        mean = [0.4914, 0.4822, 0.4465]
-        std = [0.2471, 0.2435, 0.2616]
-        train_transform, test_transform = transform(96, mean, std)
+        mean= [0.485, 0.456, 0.406]
+        std= [0.229, 0.224, 0.225]
+        train_transform = transforms.Compose([
+            transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std)
+        ])
+        test_transform = transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std),
+        ])
+        # data prepare
+        root = '~/../DATA/ILSVRC/Data/CLS-LOC'
+        traindir = os.path.join(root, 'train')
+        valdir = os.path.join(root, 'val')
+
+        train_data = ImageFolder(traindir, train_transform)
         
-        train_data = STL10(
-            root='data', split='train', transform=train_transform, download=True)
         train_loader = DataLoader(
-            train_data, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=True)
-        test_data = STL10(
-            root='data', split='test', transform=test_transform, download=True)
+            train_data, batch_size=batch_size, shuffle=True,
+            num_workers=8, pin_memory=True, drop_last=True)
+
+        test_data = ImageFolder(valdir, test_transform)
         test_loader = DataLoader(
-            test_data, batch_size=batch_size, shuffle=False, num_workers=8, pin_memory=True)
-        
-    if dataset_name == 'skin':
-        mean = [0.7630, 0.5463, 0.5706]
-        std = [0.2471, 0.2435, 0.2616]
-        train_transform, test_transform = transform(128, mean, std)
-        
-        train_data = SKIN(
-            root='data', train=True, transform=test_transform)
-        train_loader = DataLoader(
-            train_data, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=True)
-        test_data = SKIN(
-            root='data', train=False, transform=test_transform)
-        test_loader = DataLoader(
-            test_data, batch_size=batch_size, shuffle=False, num_workers=8, pin_memory=True)        
-        
-    #if dataset_name is 'retina':
-        
+            test_data, batch_size=batch_size, shuffle=False,
+            num_workers=8, pin_memory=True)
     
     print(train_data.classes)
-    model = Net(num_class=len(train_data.classes), pretrained_path=model_path).cuda()
+    model = Net(base_model, num_class=len(train_data.classes), pretrained_path=model_path).cuda()
     for param in model.f.parameters():
         param.requires_grad = False
         
     if torch.cuda.device_count() > 1:
         print("We have available", torch.cuda.device_count(), "GPUs!")
-        model = nn.DataParallel(model, device_ids=[0, 1])
+        model = nn.DataParallel(model, device_ids=[0, 1, 2, 3])
 
     save_name_pre = '{}_{}_{}_{}_{}'.format(
         dataset_name, k_subnets, base_model, batch_size, epochs)

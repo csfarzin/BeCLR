@@ -27,6 +27,7 @@ def transform(size, mean, std):
 
     test_transform = transforms.Compose([
         transforms.Resize((size, size)),
+        transforms.CenterCrop(size),
         transforms.ToTensor(),
         transforms.Normalize(mean=mean, std=std)
     ])

@@ -83,7 +83,10 @@ class Trainer():
         #if epoch >= 100:
         self.scheduler.step()
 
-        return total_loss/total_num, tot_bloss/total_num, tot_nt_xent/total_num
+        return (total_loss/total_num,
+                tot_bloss/total_num,
+                tot_nt_xent/total_num,
+                self.scheduler.get_last_lr()[0])
     
     
     def bregman_sim(self, feature, feature_bank):
