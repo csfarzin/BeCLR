@@ -8,11 +8,13 @@
 </p>
 
 ----
-### This is the official PyTorch implementation of the BeCLR paper:
+### PyTorch implementation of the [Deep Bregman Divergence for Contrastive Learning of Visual Representations](https://arxiv.org/abs/2109.07455):
 ```
 @Article{
-
-
+  title={Deep Bregman Divergence for Contrastive Learning of Visual Representations},
+  author={Mina Rezaei<sup>*</sup>, Farzin Soleymani<sup>*</sup>, Bernd Bischl, Shekoofeh Azizi},
+  journal={arXiv preprint arXiv:2109.07455v2},
+  year={2021}
 }
 ```
 
