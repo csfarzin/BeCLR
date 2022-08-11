@@ -1,6 +1,6 @@
 ## BeCLR: Bregman Divergence Improves Contrastive Learning of Visual Representations
 <p align="center">
-  <img src="https://github.com/csfarzin/BeCLR/blob/master/media/BeCLR_Arch.jpg" width="800"/>
+  <img src="https://github.com/csfarzin/BeCLR/blob/master/media/BeCLR_Arch.png" width="800"/>
 </p>
 
 <p align="justify">
@@ -12,7 +12,7 @@
 ```
 @Article{
   title={Deep Bregman Divergence for Contrastive Learning of Visual Representations},
-  author={Mina Rezaei<sup>*</sup>, Farzin Soleymani<sup>*</sup>, Bernd Bischl, Shekoofeh Azizi},
+  author={Mina Rezaei*, Farzin Soleymani*, Bernd Bischl, Shekoofeh Azizi},
   journal={arXiv preprint arXiv:2109.07455v2},
   year={2021}
 }
